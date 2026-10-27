@@ -1,0 +1,9 @@
+{
+  "grid_size": 10,
+  "turn": "BLACK",
+  "move_number": 0,
+  "captured_black": 0,
+  "captured_white": 0,
+  "ko_point": null,
+  "stones": []
+}

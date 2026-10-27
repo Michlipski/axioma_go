@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Axioma Go // 碁 (10×10) — Sovereign Tactile Board UI</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-kaya">
+  <!-- Top Application Bar -->
+  <header class="app-header">
+    <div class="header-brand">
+      <div class="brand-stone-icon">
+        <svg viewBox="0 0 40 40" width="32" height="32">
+          <circle cx="16" cy="20" r="12" fill="#181a1f" stroke="#333" stroke-width="1.5" filter="drop-shadow(1px 2px 3px rgba(0,0,0,0.5))"/>
+          <circle cx="24" cy="18" r="12" fill="#f5f2eb" stroke="#bbb" stroke-width="1.5" filter="drop-shadow(1px 2px 3px rgba(0,0,0,0.3))"/>
+          <circle cx="13" cy="16" r="3" fill="#555" opacity="0.6"/>
+          <circle cx="21" cy="14" r="3" fill="#fff" opacity="0.9"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <h1 class="brand-title">AXIOMA GO <span class="kanji-badge">碁</span> <span class="grid-spec">10×10</span></h1>
+        <p class="brand-subtitle">Sovereign Tactile Wood-Grain Substrate & Capture Showcase Engine</p>
+      </div>
+    </div>
+
+    <!-- Mode Selector Navigation -->
+    <nav class="mode-navigation">
+      <button id="btnModeFreePlay" class="nav-btn active" title="Interactive 10x10 Free Play Mode">
+        <span class="icon">●</span> Free Play
+      </button>
+      <button id="btnModeShowcase" class="nav-btn" title="Automated Capture Showcase Mode">
+        <span class="icon">⚡</span> Capture Showcases
+      </button>
+    </nav>
+
+    <!-- Overlay Toggles & Telemetry Link -->
+    <div class="header-controls">
+      <div class="toggle-group" title="Toggle Stone Liberty Heatmap">
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggleHeatmap" checked>
+          <span class="slider"></span>
+        </label>
+        <span class="toggle-label"><span class="badge-dot dot-heatmap"></span> Heatmap</span>
+      </div>
+
+      <div class="toggle-group" title="Toggle Pulsing Atari Warning Halos">
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggleAtariHalos" checked>
+          <span class="slider"></span>
+        </label>
+        <span class="toggle-label"><span class="badge-dot dot-atari"></span> Atari Halos</span>
+      </div>
+
+      <div class="toggle-group" title="Toggle Board Coordinates (A-K, 1-10)">
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggleCoords" checked>
+          <span class="slider"></span>
+        </label>
+        <span class="toggle-label">Coords</span>
+      </div>
+
+      <a href="dashboard.html" target="_blank" class="telemetry-link-btn" title="Open Development Process Telemetry Dashboard">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+          <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+        </svg>
+        <span>Telemetry</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Application Workspace -->
+  <main class="main-workspace">
+    
+    <!-- LEFT PANEL: Tactical HUD & Match Controls -->
+    <aside class="panel left-panel">
+      <!-- Turn Indicator Card -->
+      <section class="card turn-card">
+        <div class="card-header">
+          <span class="card-tag">ROUND STATUS</span>
+          <span id="moveCountBadge" class="badge badge-pill">Move #0</span>
+        </div>
+        <div class="turn-display">
+          <div id="activeStonePreview" class="stone-preview stone-black">
+            <div class="stone-sheen"></div>
+          </div>
+          <div class="turn-meta">
+            <span class="turn-label">Current Turn</span>
+            <h2 id="turnPlayerName" class="player-name">BLACK'S TURN</h2>
+            <p id="turnStatusDesc" class="turn-subtext">Click any intersection to place a stone</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Graveyard & Prisoners Card -->
+      <section class="card graveyard-card">
+        <div class="card-header">
+          <span class="card-tag">PRISONERS / GRAVEYARD</span>
+          <span class="card-subtag">Captured Stones</span>
+        </div>
+        <div class="graveyard-grid">
+          <!-- Black's Captures (White Stones Taken) -->
+          <div class="graveyard-box">
+            <div class="graveyard-header">
+              <span class="mini-stone mini-white"></span>
+              <span class="box-title">Black's Prisoners</span>
+            </div>
+            <div class="graveyard-body">
+              <span id="capturesBlackCount" class="capture-number">0</span>
+              <div id="graveyardBlackStones" class="graveyard-rack"></div>
+            </div>
+          </div>
+
+          <!-- White's Captures (Black Stones Taken) -->
+          <div class="graveyard-box">
+            <div class="graveyard-header">
+              <span class="mini-stone mini-black"></span>
+              <span class="box-title">White's Prisoners</span>
+            </div>
+            <div class="graveyard-body">
+              <span id="capturesWhiteCount" class="capture-number">0</span>
+              <div id="graveyardWhiteStones" class="graveyard-rack"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tactical Danger Alert Banner -->
+      <div id="tacticalAlertBanner" class="tactical-banner banner-calm">
+        <span class="banner-icon">●</span>
+        <span id="tacticalAlertText" class="banner-text">Board State: Peaceful</span>
+      </div>
+
+      <!-- Free Play Match Controls -->
+      <section class="card controls-card">
+        <div class="card-header">
+          <span class="card-tag">MATCH CONTROLS</span>
+        </div>
+        <div class="action-buttons-grid">
+          <button id="btnUndoMove" class="btn btn-secondary" title="Revert last move via Functorial Undo (1-Tap)">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/>
+            </svg>
+            <span>Undo</span>
+          </button>
+
+          <button id="btnPassTurn" class="btn btn-secondary" title="Pass your turn to opponent">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/>
+            </svg>
+            <span>Pass</span>
+          </button>
+
+          <button id="btnResetBoard" class="btn btn-danger" title="Reset board to empty">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+            </svg>
+            <span>Reset</span>
+          </button>
+
+          <button id="btnResignMatch" class="btn btn-outline" title="Resign active match">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z"/>
+            </svg>
+            <span>Resign</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Engine Legend Card -->
+      <section class="card legend-card">
+        <div class="card-header">
+          <span class="card-tag">TACTILE OVERLAY LEGEND</span>
+        </div>
+        <div class="legend-items">
+          <div class="legend-row">
+            <span class="legend-badge badge-lib-1">1</span>
+            <span class="legend-desc"><strong>Atari</strong> (Critical 1 Liberty)</span>
+          </div>
+          <div class="legend-row">
+            <span class="legend-badge badge-lib-2">2</span>
+            <span class="legend-desc"><strong>Contested</strong> (2 Liberties)</span>
+          </div>
+          <div class="legend-row">
+            <span class="legend-badge badge-lib-3">3</span>
+            <span class="legend-desc"><strong>Stable</strong> (3 Liberties)</span>
+          </div>
+          <div class="legend-row">
+            <span class="legend-badge badge-lib-4">4+</span>
+            <span class="legend-desc"><strong>Solid Shape</strong> (4+ Liberties)</span>
+          </div>
+          <div class="legend-row">
+            <span class="legend-halo-preview"></span>
+            <span class="legend-desc"><strong>Atari Threat Pulse</strong> (Glowing halo)</span>
+          </div>
+        </div>
+      </section>
+    </aside>
+
+    <!-- CENTER PANEL: Tactile Japanese Kaya Go Board -->
+    <div class="board-column">
+      <div class="board-stage">
+        <!-- Kaya Wood Grain Board Block -->
+        <div class="board-wood-container" id="boardWoodContainer">
+          <div class="wood-grain-layer"></div>
+          <div class="wood-bevel-edge"></div>
+
+          <!-- Dynamic SVG Go Board Canvas -->
+          <svg id="goBoardSvg" class="go-board-svg" viewBox="0 0 680 680" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <!-- Black Stone Radial Gradient (Obsidian Slate with Specular Reflection) -->
+              <radialGradient id="blackStoneGrad" cx="35%" cy="30%" r="65%">
+                <stop offset="0%" stop-color="#555861"/>
+                <stop offset="35%" stop-color="#242730"/>
+                <stop offset="75%" stop-color="#121317"/>
+                <stop offset="100%" stop-color="#08080a"/>
+              </radialGradient>
+
+              <!-- White Stone Radial Gradient (Lustrous Clamshell / Moonstone) -->
+              <radialGradient id="whiteStoneGrad" cx="35%" cy="30%" r="65%">
+                <stop offset="0%" stop-color="#ffffff"/>
+                <stop offset="45%" stop-color="#f5f2eb"/>
+                <stop offset="80%" stop-color="#e0dacf"/>
+                <stop offset="100%" stop-color="#b8b0a0"/>
+              </radialGradient>
+
+              <!-- Stone Drop Shadow -->
+              <filter id="stoneDropShadow" x="-20%" y="-20%" width="150%" height="150%">
+                <feDropShadow dx="3" dy="5" stdDeviation="3.5" flood-color="#140a02" flood-opacity="0.55"/>
+              </filter>
+
+              <!-- Pulsing Atari Glow Filter -->
+              <filter id="atariGlow" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="3" result="blur"/>
+                <feMerge>
+                  <feMergeNode in="blur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
+
+            <!-- Grid & Labels Layers -->
+            <g id="layerCoords" class="layer-coords"></g>
+            <g id="layerGridLines" class="layer-grid-lines"></g>
+            <g id="layerStarPoints" class="layer-star-points"></g>
+            <g id="layerHoverGhost" class="layer-hover-ghost"></g>
+            <g id="layerAtariHalos" class="layer-atari-halos"></g>
+            <g id="layerStones" class="layer-stones"></g>
+            <g id="layerLastMove" class="layer-last-move"></g>
+            <g id="layerHeatmap" class="layer-heatmap"></g>
+            <g id="layerClickInterceptors" class="layer-click-interceptors"></g>
+          </svg>
+        </div>
+
+        <!-- Board Footer Subtext -->
+        <div class="board-footer-bar">
+          <div class="board-info">
+            <span class="info-item">Standard 10×10 Grid (A1 to K10, skipping I)</span>
+            <span class="info-dot">•</span>
+            <span class="info-item">Positional Ko Enforced</span>
+            <span class="info-dot">•</span>
+            <span class="info-item">Suicide Prohibited</span>
+          </div>
+          <div class="board-legend-shortcut">
+            <span id="hoverCoordReadout" class="coord-readout">Intersection: --</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL: Automated Capture Showcase & Commentary -->
+    <aside class="panel right-panel" id="panelShowcase">
+      <!-- Showcase Selector & Header -->
+      <section class="card showcase-header-card">
+        <div class="card-header">
+          <span class="card-tag">CAPTURE SHOWCASE LIBRARY</span>
+          <span class="badge badge-accent">6 Tesuji Techniques</span>
+        </div>
+        <p class="showcase-lead">Select a classical Go capture technique to step through the sequence and inspect tactical commentary:</p>
+        
+        <!-- Showcase Dropdown Selector -->
+        <div class="select-container">
+          <select id="selectShowcase" class="showcase-select" title="Choose a Go capture technique">
+            <option value="snapback">打って返し — Snapback (Uttegaeshi)</option>
+            <option value="ladder">征子 — The Ladder (Shichō)</option>
+            <option value="geta">下駄 — The Net (Geta)</option>
+            <option value="cranes_nest">鶴の巣ごもり — Crane's Nest (Tsuru no Sugomori)</option>
+            <option value="double_atari">両アタリ — Double Atari (Ryō-atari)</option>
+            <option value="ishi_no_shita">石の下 — Under the Stones (Ishi-no-shita)</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- Active Showcase Description Card -->
+      <section class="card showcase-info-card">
+        <div class="showcase-title-row">
+          <div class="showcase-title-block">
+            <h3 id="showcaseName" class="showcase-title">Snapback (Uttegaeshi)</h3>
+            <span id="showcaseJapanese" class="showcase-japanese">打って返し</span>
+          </div>
+          <span id="showcaseStepCounter" class="badge badge-step">Step 0 / 3</span>
+        </div>
+        <p id="showcaseDesc" class="showcase-body">
+          A classic sacrifice tesuji: Black feeds a stone into the opponent's mouth, and when White captures, Black immediately snaps back to capture the entire group.
+        </p>
+      </section>
+
+      <!-- Stepper Controls & Auto-Play -->
+      <section class="card stepper-card">
+        <div class="card-header">
+          <span class="card-tag">SEQUENCE STEPPER CONTROLS</span>
+          <div class="speed-toggle-group">
+            <button class="speed-btn active" data-speed="1000">1.0s</button>
+            <button class="speed-btn" data-speed="500">0.5s</button>
+            <button class="speed-btn" data-speed="1500">1.5s</button>
+          </div>
+        </div>
+
+        <!-- Step Slider -->
+        <div class="stepper-progress-bar">
+          <input type="range" id="stepSlider" min="0" max="3" value="0" class="step-range-input">
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="stepper-buttons">
+          <button id="btnStepFirst" class="btn btn-ctrl" title="First step (Setup)">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+            </svg>
+          </button>
+          <button id="btnStepPrev" class="btn btn-ctrl" title="Previous step">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+            </svg>
+          </button>
+          <button id="btnAutoPlay" class="btn btn-primary btn-play" title="Auto-Play sequence">
+            <svg id="playIcon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+            <span id="playButtonText">Auto-Play</span>
+          </button>
+          <button id="btnStepNext" class="btn btn-ctrl" title="Next step">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+            </svg>
+          </button>
+          <button id="btnStepLast" class="btn btn-ctrl" title="Last step (Capture culmination)">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Prominent FORK & PLAY Button -->
+        <button id="btnForkPlay" class="btn btn-fork" title="Fork this showcase position at current ply into Free Play!">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <path d="M17 3a4 4 0 0 0-4 4c0 .87.28 1.67.76 2.33L10.42 12.7c-.55-.44-1.23-.7-1.98-.7-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3c0-.28-.05-.55-.13-.8l3.35-3.35c.66.48 1.47.75 2.34.75 2.21 0 4-1.79 4-4s-1.79-4-4-4zm-8.56 14.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM17 9c-.83 0-1.5-.67-1.5-1.5S16.17 6 17 6s1.5.67 1.5 1.5S17.83 9 17 9z"/>
+          </svg>
+          <span>Fork & Play This Position</span>
+        </button>
+      </section>
+
+      <!-- Tactical Commentary Card -->
+      <section class="card commentary-card">
+        <div class="card-header">
+          <span class="card-tag">TACTICAL COMMENTARY</span>
+          <span id="threatBadge" class="threat-badge threat-calm">CALM</span>
+        </div>
+        <div class="commentary-body">
+          <div class="commentary-meta-row">
+            <span id="commMoveCoord" class="comm-coord">Move: Initial Setup</span>
+            <span id="commJapaneseTerm" class="comm-term">布石 (Setup)</span>
+          </div>
+          <p id="commExplanation" class="comm-text">
+            White has a 6-stone group surrounded by Black with only two inner liberties at E5 and E6. Black prepares the snapback sacrifice.
+          </p>
+        </div>
+      </section>
+    </aside>
+
+  </main>
+
+  <!-- Floating Toast Notifications -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Pure Vanilla JavaScript -->
+  <script src="app.js"></script>
+</body>
+</html>

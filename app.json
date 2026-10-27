@@ -1,0 +1,42 @@
+{
+  "app_id": "axioma_go",
+  "name": "Axioma Go: 10x10 Tactical Capture Dojo",
+  "version": "1.0.0",
+  "generation": "gen_04b",
+  "port": 8082,
+  "description": "Tactical Go product favoring depth over breadth, centered on automated capturing showcases (Snapback, Ladder, Geta, Crane's Nest, Double Atari, Under the Stones) and a functional 10x10 board with interactive forking, dynamic liberty heatmap, pulsing atari threat halos, and 1-tap functorial undo.",
+  "invariants": [
+    "L1-G4B-001",
+    "L1-G4B-002",
+    "L1-G4B-003",
+    "L1-G4B-004",
+    "L1-G4B-005",
+    "L1-G4B-008",
+    "L1-G3B-000",
+    "L1-G3B-011",
+    "L1-G3B-018",
+    "L1-002",
+    "L1-016",
+    "NEG-G1B-001",
+    "INV-GO-001",
+    "INV-GO-002",
+    "INV-GO-003",
+    "INV-GO-004",
+    "INV-GO-005"
+  ],
+  "entrypoint": "run.py",
+  "tech_stack": {
+    "language": "Python 3.14",
+    "backend": "Pure Standard Library http.server (Zero external dependencies)",
+    "frontend": "Pure HTML5 / CSS3 / Vanilla JavaScript ES6+ (Zero external CDN)",
+    "board_grid": "10x10 Intersections (100 points, A1-K10 excluding I)"
+  },
+  "showcases": [
+    "showcase_01_snapback",
+    "showcase_02_ladder",
+    "showcase_03_geta",
+    "showcase_04_cranes_nest",
+    "showcase_05_double_atari",
+    "showcase_06_ishi_no_shita"
+  ]
+}

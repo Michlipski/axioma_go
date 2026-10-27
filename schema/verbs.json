@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AxiomaGoVerbs",
+  "verbs": [
+    {
+      "name": "PlayMove",
+      "input": {
+        "x": "integer",
+        "y": "integer",
+        "color": "optional StoneColor"
+      },
+      "preconditions": [
+        "0 <= x <= 9 and 0 <= y <= 9",
+        "grid[x, y] == EMPTY",
+        "(x, y) != ko_point",
+        "not suicide_without_captures"
+      ],
+      "postconditions": [
+        "grid[x, y] == color",
+        "adjacent dead opponent groups removed",
+        "captures counter updated",
+        "turn toggled"
+      ]
+    },
+    {
+      "name": "PassTurn",
+      "input": { "color": "optional StoneColor" },
+      "postconditions": ["ko_point cleared", "turn toggled"]
+    },
+    {
+      "name": "UndoMove",
+      "postconditions": [
+        "previous board state restored",
+        "captured stones resurrected",
+        "previous ko point restored",
+        "turn reverted"
+      ]
+    },
+    {
+      "name": "ForkShowcase",
+      "input": {
+        "showcase_id": "string",
+        "ply": "integer"
+      },
+      "postconditions": [
+        "board instantiated to showcase state at ply",
+        "mode set to FreePlay"
+      ]
+    }
+  ]
+}
